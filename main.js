@@ -17,6 +17,7 @@ const fs = require('fs');
 var registry = require('winreg');
 
 const {appUpdater} = require('./autoupdater');
+const isDev = require('electron-is-dev');  // this is required to check if the app is running in development mode. 
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -36,7 +37,11 @@ function createWindow () {
 
   // Open the DevTools.
   //mainWindow.webContents.openDevTools()
-
+  const checkOS = isWindowsOrmacOS();
+  if (checkOS && !isDev) {
+    // Initate auto-updates on macOs and windows
+    appUpdater();
+  }
   // Emitted when the window is closed.
   mainWindow.on('closed', function () {
     // Dereference the window object, usually you would store windows
@@ -49,13 +54,9 @@ function createWindow () {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on('ready', createWindow) {
-  const checkOS = isWindowsOrmacOS();
-  if (checkOS && !isDev) {
-    // Initate auto-updates on macOs and windows
-    appUpdater();
-  }
-}
+app.on('ready', createWindow)
+
+
 
 // Quit when all windows are closed.
 app.on('window-all-closed', function () {
