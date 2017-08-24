@@ -17,7 +17,6 @@ const fs = require('fs');
 var registry = require('winreg');
 
 const {appUpdater} = require('./autoupdater');
-const isDev = require('electron-is-dev');  // this is required to check if the app is running in development mode. 
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -26,7 +25,7 @@ let mainWindow
 function createWindow () {
   // Create the browser window.
   mainWindow = new BrowserWindow({width: 800, height: 600})
-  //mainWindow.setMenu(null);
+  mainWindow.setMenu(null);
 
   // and load the index.html of the app.
   mainWindow.loadURL(url.format({
@@ -37,11 +36,8 @@ function createWindow () {
 
   // Open the DevTools.
   //mainWindow.webContents.openDevTools()
-  const checkOS = isWindowsOrmacOS();
-  if (checkOS && !isDev) {
     // Initate auto-updates on macOs and windows
-    appUpdater();
-  }
+  appUpdater();
   // Emitted when the window is closed.
   mainWindow.on('closed', function () {
     // Dereference the window object, usually you would store windows
@@ -74,11 +70,5 @@ app.on('activate', function () {
     createWindow()
   }
 })
-
-function isWindowsOrmacOS() {
-	return process.platform === 'darwin' || process.platform === 'win32';
-}
-
-
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
