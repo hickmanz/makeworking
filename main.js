@@ -14,9 +14,9 @@ const BrowserWindow = electron.BrowserWindow
 const path = require('path');
 const url = require('url');
 const fs = require('fs');
-var registry = require('winreg');
 
 const {appUpdater} = require('./autoupdater');
+const isDev = require('electron-is-dev');
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -35,9 +35,12 @@ function createWindow () {
   }))
 
   // Open the DevTools.
-  //mainWindow.webContents.openDevTools()
+  mainWindow.webContents.openDevTools()
     // Initate auto-updates on macOs and windows
-  appUpdater();
+  console.log(isDev);
+    if (!isDev) {
+    appUpdater();
+  }
   // Emitted when the window is closed.
   mainWindow.on('closed', function () {
     // Dereference the window object, usually you would store windows
@@ -51,8 +54,6 @@ function createWindow () {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', createWindow)
-
-
 
 // Quit when all windows are closed.
 app.on('window-all-closed', function () {
