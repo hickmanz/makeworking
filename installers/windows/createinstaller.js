@@ -14,11 +14,15 @@ function getInstallerConfig () {
     const outPath = path.join(rootPath, 'release-builds')
 
     return Promise.resolve({
-       appDirectory: path.join(outPath, 'Make\ Working-win32-ia32/'),
+       appDirectory: path.join(outPath, 'Make\ Working-win32-x64/'),
        authors: 'Zackary Hickman',
        noMsi: true,
+       icon: path.join(rootPath, "assets/icons/win/icon.ico"),
+       loadingGif: "assets/gif/loading.gif",
+       iconUrl: "http://makeworking.zackaryhickman.com/icon.ico",
+       setupIcon: path.join(rootPath, "assets/icons/win/icon.ico"),
        outputDirectory: path.join(outPath, 'windows-installer'),
        exe: 'Make\ Working.exe',
-       setupExe: 'Make\ Working\ Installer.exe'
+       setupExe: 'Make\ Working\ Setup.exe'
    })
 }

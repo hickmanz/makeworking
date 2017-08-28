@@ -1,120 +1,113 @@
-const electron = require('electron')
-const app = electron.app
+const electron = require('electron');
+const app = electron.app;
 
 module.exports = {
 handleSquirrelEvent: function() {
- if (process.argv.length === 1) {
- return false;
- }
-
- const ChildProcess = require('child_process');
- const path = require('path');
- const regedit = require('regedit')
-
- const appFolder = path.resolve(process.execPath, '..');
- const rootAtomFolder = path.resolve(appFolder, '..');
- const updateDotExe = path.resolve(path.join(rootAtomFolder, 'Update.exe'));
- const exeName = path.basename(process.execPath);
- const spawn = function(command, args) {
- let spawnedProcess, error;
-
- var regKeys = ['HKCR\\*\\shell\\MakeWorking','HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\CommandStore\\shell\\AddWorking','HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\CommandStore\\shell\\AddWorking\\command','HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\CommandStore\\shell\\RemoveWorking','HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\CommandStore\\shell\\RemoveWorking\\command']
-
- var valuesToPut = {
-    'HKCR\\*\\shell\\MakeWorking': {
-        'Icon': {
-            value: process.execPath,
-            type: 'REG_SZ'
-        },
-        'MUIVerb': {
-            value: 'Make Working',
-            type: 'REG_SZ'
-        },
-        'SubCommands': {
-            value: 'AddWorking;RemoveWorking;',
-            type: 'REG_SZ'
-        }
-    },
-    'HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\CommandStore\\shell\\AddWorking': {
-        '(Default)': {
-            value: 'Add to working',
-            type: 'REG_DEFAULT'
-        }
-    },
-    'HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\CommandStore\\shell\\AddWorking\\command': {
-        '(Default)': {
-            value: process.execPath + ' %1',
-            type: 'REG_DEFAULT'
-        }
-    },
-    'HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\CommandStore\\shell\\RemoveWorking': {
-        '(Default)': {
-            value: 'Remove from working',
-            type: 'REG_DEFAULT'
-        }
-    },
-    'HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\CommandStore\\shell\\RemoveWorking\\command': {
-        '(Default)': {
-            value: process.execPath + ' %1',
-            type: 'REG_DEFAULT'
-        }
+    if (process.argv.length === 1) {
+    return false;
     }
-}
-console.log("IM HERE");
- try {
- spawnedProcess = ChildProcess.spawn(command, args, {detached: true});
- } catch (error) {}
 
- return spawnedProcess;
- };
+    const ChildProcess = require('child_process');
+    const path = require('path');
+    const Registry = require('winreg');
+    const appFolder = path.resolve(process.execPath, '..');
+    const rootAtomFolder = path.resolve(appFolder, '..');
+    const updateDotExe = path.resolve(path.join(rootAtomFolder, 'Update.exe'));
+    const exeName = path.basename(process.execPath);
+    const spawn = function(command, args) {
+        let spawnedProcess, error;
 
- const spawnUpdate = function(args) {
- return spawn(updateDotExe, args);
- };
+        try {
+            spawnedProcess = ChildProcess.spawn(command, args, {detached: true});
+        } catch (error) {}
 
- const squirrelEvent = process.argv[1];
-switch (squirrelEvent) {
- case '--squirrel-install':
- case '--squirrel-updated':
- // Optionally do things such as:
- // - Add your .exe to the PATH
- // - Write to the registry for things like file associations and
- // explorer context menus
+        return spawnedProcess;
+    };
 
- // Install desktop and start menu shortcuts
- spawnUpdate(['--createShortcut', exeName]);
- 
-    regedit.createKey(regKeys, function(err) {
-        if (err) console.log(err);
-        regedit.putValue(valuesToPut, function(err) {
-            if (err) console.log(err);
-        })  
-    })
+    const spawnUpdate = function(args) {
+        return spawn(updateDotExe, args);
+    };
+    let regFilesMain = new Registry({
+        hive: Registry.HKCU,
+        key: `\\Software\\Classes\\*\\shell\\MakeWorking`
+    });
+    let regFilesSec = new Registry({
+        hive: Registry.HKCU,
+        key: `\\Software\\Classes\\*\\shell\\MakeWorking\\command`
+    });
+    let regFoldersMain = new Registry({
+        hive: Registry.HKCU,
+        key: `\\Software\\Classes\\Directory\\shell\\MakeWorking`
+    });
+    let regFoldersSec = new Registry({
+        hive: Registry.HKCU,
+        key: `\\Software\\Classes\\Directory\\shell\\MakeWorking\\command`
+    });  
+    const squirrelEvent = process.argv[1];
+    switch (squirrelEvent) {
+        case '--squirrel-install':
+        case '--squirrel-updated':
 
- setTimeout(app.quit, 1000);
- return true;
+            regFilesMain.create( function (err) {  
+                if (err) throw err;
+                regFilesMain.set(Registry.DEFAULT_VALUE, 'REG_SZ', 'Change working', function (err) {
+                    if (err) throw err;    
+                });
+                regFilesMain.set('Icon', 'REG_SZ', process.execPath, function (err) {             
+                    if (err) throw err;   
+                });
+            });
+            regFilesSec.create( function (err) {             
+                if (err) throw err;
+                regFilesSec.set(Registry.DEFAULT_VALUE, 'REG_SZ', process.execPath + ' %1', function (err) { 
+                    if (err) throw err; 
+                });  
+            });
+            regFoldersMain.create( function (err) {  
+                if (err) throw err;
+                regFoldersMain.set(Registry.DEFAULT_VALUE, 'REG_SZ', 'Change working', function (err) {
+                    if (err) throw err;    
+                });
+                regFoldersMain.set('Icon', 'REG_SZ', process.execPath, function (err) {             
+                    if (err) throw err;   
+                });
+            });
+            regFoldersSec.create( function (err) {             
+                if (err) throw err;  
+                regFoldersSec.set(Registry.DEFAULT_VALUE, 'REG_SZ', process.execPath + ' %1', function (err) { 
+                    if (err) throw err; 
+                });
+            });
 
- case '--squirrel-uninstall':
- // Undo anything you did in the --squirrel-install and
- // --squirrel-updated handlers
+            // Install desktop and start menu shortcuts
+            spawnUpdate(['--createShortcut', exeName]);
+            
+            setTimeout(app.quit, 1000);
+            return true;
 
- // Remove desktop and start menu shortcuts
- spawnUpdate(['--removeShortcut', exeName]);
+        case '--squirrel-uninstall':
+            // Undo anything you did in the --squirrel-install and
+            // --squirrel-updated handlers
 
- regedit.deleteKey(regKeys, function(err) {
-    if (err) console.log(err);
- });
+            // Remove desktop and start menu shortcuts
+            regFilesMain.destroy(function (err) {             
+                if (err) throw err;  
+            });
+            regFoldersMain.destroy(function (err) {             
+                if (err) throw err;  
+            });
+            spawnUpdate(['--removeShortcut', exeName]);
 
- setTimeout(app.quit, 1000);
- return true;
+            setTimeout(app.quit, 1000);
+            return true;
 
- case '--squirrel-obsolete':
- // This is called on the outgoing version of your app before
- // we update to the new version - it's the opposite of
- // --squirrel-updated
+        case '--squirrel-obsolete':
+            // This is called on the outgoing version of your app before
+            // we update to the new version - it's the opposite of
+            // --squirrel-updated
 
- app.quit();
- return true;
-}
+            app.quit();
+            return true;
+    }
 }
 }

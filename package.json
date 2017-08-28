@@ -1,14 +1,14 @@
 {
   "name": "makeworking",
   "productName": "Make Working",
-  "version": "0.0.5",
+  "version": "0.0.7",
   "description": "Make Working Description",
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "electron .",
-    "build": "node installers/windows/createinstaller.js & electron-packager . --overwrite --asar=true --platform=win32 --arch=ia32 --icon=assets/icons/win/icon.ico --prune=true --out=release-builds --version-string.CompanyName=CE --version-string.FileDescription=CE --version-string.ProductName=\"Make Working\"",
-    "package": "electron-packager . --overwrite --asar=true --platform=win32 --arch=ia32 --icon=assets/icons/win/icon.ico --prune=true --out=release-builds --version-string.CompanyName=CE --version-string.FileDescription=CE --version-string.ProductName=\"Make Working\""
+    "build": "node installers/windows/createinstaller.js & electron-packager . --overwrite --asar=true --platform=win32 --arch=x64 --icon=assets/icons/win/icon.ico --prune=true --out=release-builds --version-string.CompanyName=ZH --version-string.FileDescription=ZH --version-string.ProductName=\"Make Working\"",
+    "package": "electron-packager . --overwrite --asar=true --platform=win32 --arch=x64 --icon=assets/icons/win/icon.ico --prune=true --out=release-builds --version-string.CompanyName=ZH --version-string.FileDescription=ZH --version-string.ProductName=\"Make Working\""
   },
   "author": "",
   "license": "ISC",
@@ -18,9 +18,10 @@
     "electron-winstaller": "^2.6.3"
   },
   "dependencies": {
+    "electron-args": "^0.1.0",
     "electron-is-dev": "^0.3.0",
     "electron-settings": "^3.1.1",
     "progress-stream": "^2.0.0",
-    "regedit": "^2.2.7"
+    "winreg": "^1.2.4"
   }
 }
