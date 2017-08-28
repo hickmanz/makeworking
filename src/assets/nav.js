@@ -1,12 +1,15 @@
-const settings = require('electron-settings')
+
+const remote = require('electron').remote; 
+const settings = require('electron').remote.require('electron-settings');
+
 var currentPage = "";
 
 hideAllModals();
 
-console.log(settings.has('setup.isComplete'));
-
 if(!settings.has('setup.isComplete')){
   showModal('setup');
+} else {
+  showModal('main');
 }
 //if setup.isComplete is false go to setup modal
 
@@ -16,6 +19,7 @@ function hideAllModals () {
     Array.prototype.forEach.call(modals, function (modal) {
       modal.classList.remove('is-shown')
     })
+    currentPage = ""
 }
 function showModal (modalName) {
   const modal = document.getElementById(modalName + '-modal');
@@ -25,5 +29,10 @@ function showModal (modalName) {
 module.exports = {
   getCurrentPage: function() {
     return currentPage;
+  },
+  switchToPage: function(newPage) {
+    hideAllModals();
+    showModal(newPage);
+    return true;
   }
 }

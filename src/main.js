@@ -26,18 +26,23 @@ var windowArray = [];
 
 function createMainWindow () {
   // Create the browser window.
-  mainWindow = new BrowserWindow({width: 800, height: 600, frame: false });
+  mainWindow = new BrowserWindow({width: 800, height: 600, frame: false, show: false });
   mainWindow.name = "mainWindow";  
   windowArray.push(mainWindow);
   mainWindow.setMenu(null);
   // and load the index.html of the app.
+  mainWindow.webContents.on('did-finish-load', ()=>{
+    mainWindow.show();
+    mainWindow.focus();
+  });
   mainWindow.loadURL(url.format({
     pathname: path.join(__dirname, 'index.html'),
     protocol: 'file:',
     slashes: true
   }))
-  //pen the DevTools.
-  mainWindow.webContents.openDevTools()
+  if (!isDev) {
+    mainWindow.webContents.openDevTools()
+  }
   // Emitted when the window is closed.
   mainWindow.on('closed', function () {
     // Dereference the window object, usually you would store windows
@@ -49,13 +54,17 @@ function createMainWindow () {
 }
 function createProgressWindow(){
   const modalPath = path.join( __dirname, './sections/progress.html')
-  progressWin = new BrowserWindow({width: 400, height: 200, frame: false })
+  progressWin = new BrowserWindow({width: 400, height: 200, frame: false, show: false })
   progressWin.name = "progressWin";
   windowArray.push(progressWin);
   progressWin.on('closed', function () { 
     progressWin = null;
     removeWindow('progressWin');
   })
+  progressWin.webContents.on('did-finish-load', ()=>{
+    progressWin.show();
+    progressWin.focus();
+  });
   progressWin.loadURL(modalPath)
   progressWin.show()
 }
@@ -80,6 +89,7 @@ function removeWindow(windowName){
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', function () {
+  const settings = require('electron-settings');
   
   if(opts.input[0]){
     createProgressWindow();
