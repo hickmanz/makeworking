@@ -10,7 +10,7 @@ Make Working is a tool for those who have a small but fast drive (an SSD) runnin
 [![build status](https://api.travis-ci.org/jprichardson/node-fs-extra.svg)](http://travis-ci.org/jprichardson/node-fs-extra)
 [![windows Build status](https://img.shields.io/appveyor/ci/jprichardson/node-fs-extra/master.svg?label=windows%20build)](https://ci.appveyor.com/project/jprichardson/node-fs-extra/branch/master)
 
-<br><br>
+<br>
 
 Usage
 ----
